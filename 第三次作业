@@ -1,0 +1,178 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<iostream>
+typedef struct Node
+{
+	int row,col,data;             //行数列数和值
+	struct Node *right,*down;      //向右和下的指针
+}Node,*Link;
+typedef struct List
+{
+	Link *rhead,*chead;          //行和列的头结点
+	int rnum,cnum,num;             //行数、列数和不为0的点的总数
+}List;
+int CreateList(List *L)
+{
+	int x,y,z,e,m,n,i,j;
+	Link p=NULL,q=NULL;
+	scanf("%d %d %d",&x,&y,&z);
+	L->rnum=x;L->cnum=y;L->num=z;
+	L->rhead=(Link *)malloc((x+1)*sizeof(Link));
+	L->chead=(Link *)malloc((y+1)*sizeof(Link));
+	for(i=1;i<=L->rnum;i++)
+		L->rhead[i]=NULL;
+	for(i=1;i<=L->cnum;i++)
+		L->chead[i]=NULL;
+	printf("以三元组形式依次输入不为0的数所对应的行数、列数及对应的值:\n");
+	for(i=1;i<=L->num;i++)
+	{
+		scanf("%d %d %d",&m,&n,&e);
+         if(m>L->rnum||n>L->cnum)
+			printf("输入错误\n");
+		p=new Node;
+		p->row=m;p->col=n;p->data=e;
+		p->right=NULL;p->down=NULL;
+		if(L->rhead[m]==NULL)
+			L->rhead[m]=p;
+		else
+		{
+			for(q=L->rhead[m];q->right&&q->right->col<n;q=q->right)
+			{}
+			q->right=p;
+		}
+		if(L->chead[n]==NULL)
+			L->chead[n]=p;
+		else
+		{
+			for(q=L->chead[n];q->down&&q->down->row<m;q=q->down)
+			{}
+			q->down=p;
+		}
+	}
+	return 0;
+}
+void add(List *a,List *b)
+{
+	int i,j,c[100][100];
+	Link p,q,t;
+	for(i=1;i<10;i++)
+		for(j=1;j<10;j++)
+			c[i][j]=0;
+	if(a->rnum==b->rnum&&a->cnum==b->cnum)
+	{
+		for(i=1;i<=a->rnum;i++)
+		{
+			if(a->rhead[i]!=NULL&&b->rhead[i]==NULL)
+				for(p=a->rhead[i];p!=NULL;p=p->right)
+					c[i][p->col]=p->data;
+			if(a->rhead[i]==NULL&&b->rhead[i]!=NULL)
+				for(p=b->rhead[i];p!=NULL;p=p->right)
+					c[i][p->col]=p->data;
+			if(a->rhead[i]!=NULL&&b->rhead[i]!=NULL)
+			{
+				p=a->rhead[i];q=b->rhead[i];
+				while(p!=NULL&&q!=NULL)
+				{
+					if(p->col<q->col)
+					{
+						c[i][p->col]=p->data;
+						p=p->right;
+					}
+					if(p->col>q->col)
+					{
+						c[i][q->col]=q->data;
+						q=q->right;
+					}
+					if(p->col==q->col)
+					{
+						c[i][p->col]=p->data+q->data;
+						p=p->right;
+						q=q->right;
+					}
+				}
+				if(p!=NULL)
+				{
+					while(p!=NULL)
+					{
+						c[i][p->col]=p->data;
+						p=p->right;
+					}
+				}
+				if(q!=NULL)
+					for(;q!=NULL;q=q->right)
+						c[i][q->col]=q->data;
+	    for(i=1;i<=a->rnum;i++)
+	   {
+		   for(j=1;j<=a->cnum;j++)
+			   printf("%d ",c[i][j]);
+		   printf("\n");
+	   }
+	}
+	else
+		printf("不能相加\n");
+}
+void mult(List *a,List *b)
+{
+	int i,j,c[100][100];
+	int n;
+	Link p,q,z;
+	List *t;
+	for(i=1;i<=10;i++)
+		for(j=1;j<=10;j++)
+			c[i][j]=0;
+	if(a->cnum==b->rnum||b->cnum==a->rnum)
+	{
+		if(b->cnum==a->rnum&&b->rnum!=a->cnum)
+		{
+			t=a;
+			a=b;
+			b=t;
+		}
+		for(i=1;i<=a->rnum;i++)
+		{
+			for(j=1;j<=b->cnum;j++)
+		   {
+			   n=0;
+			   p=a->rhead[i];q=b->chead[j];
+			   if(p!=NULL&&q!=NULL)
+			  {
+				  for(;p!=NULL;p=p->right)
+				  {
+					  for(z=q;z!=NULL;z=z->down)
+					  {
+						  if(p->col==z->row)
+							  n=n+p->data*z->data;
+					  }
+				  }
+			   }
+			  c[i][j]=n;
+              }
+		}
+		for(i=1;i<=a->rnum;i++)
+		{
+			for(j=1;j<=b->cnum;j++)
+				printf("%d ",c[i][j]);
+			printf("\n");
+		}
+	}
+else
+		printf("不能相乘\n");
+}
+
+int main()
+{
+	List *a=(List *)malloc(sizeof(List));
+	List *b=(List *)malloc(sizeof(List));
+	printf("依次输入稀疏矩阵的行数、列数和不为0的数的个数:\n");
+	CreateList(a);
+	printf("依次输入稀疏矩阵的行数、列数和不为0的数的个数:\n");
+	CreateList(b);
+	printf("两矩阵相加结果\n");
+	add(a,b);
+	printf("两矩阵相乘结果\n");
+	mult(a,b);
+	return 0;
+}
+
+
+
